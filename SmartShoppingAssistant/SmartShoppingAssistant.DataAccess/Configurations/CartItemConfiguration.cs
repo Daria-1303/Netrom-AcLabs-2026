@@ -13,12 +13,17 @@ namespace SmartShoppingAssistant.DataAccess.Configurations
             builder.HasKey(ci => ci.Id);
 
             builder.HasOne(ci => ci.Product)
-                .WithOne(p => p.cartItem)
-                .HasForeignKey<CartItem>(ci => ci.ProductId);
+                .WithMany(p => p.CartItems)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(ci => ci.User)
+                .WithMany(u => u.CartItems)
+                .HasForeignKey(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(ci => ci.Quantity)
                 .IsRequired();
-
         }
 
     }

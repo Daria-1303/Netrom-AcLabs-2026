@@ -8,11 +8,11 @@ namespace SmartShoppingAssistant.BusinessLogic.Services.Interfaces
 {
     public interface ICartService
     {
-        Task<CartGetDTO> GetCartAsync();
-        Task<CartItemGetDTO> AddItemAsync(CartItemCreateDTO dto);
-        Task<CartItemGetDTO> UpdateItemQuantityAsync(int itemId, CartItemUpdateDTO dto);
-        Task RemoveItemAsync(int itemId);
-        Task ClearCartAsync();
-        Task<AnalysisResponse> AnalyzeCartAsync();
+        Task<CartGetDTO> GetCartAsync(int userId);
+        Task<CartItemGetDTO> AddItemAsync(CartItemCreateDTO dto, int userId);
+        Task<CartItemGetDTO> UpdateItemQuantityAsync(int itemId, CartItemUpdateDTO dto, int userId);
+        Task RemoveItemAsync(int itemId, int userId);
+        Task ClearCartAsync(int userId);
+        Task<AnalysisResponse> AnalyzeCartAsync(int userId);
     }
 }

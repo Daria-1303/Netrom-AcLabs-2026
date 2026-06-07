@@ -21,12 +21,13 @@ namespace SmartShoppingAssistant.BusinessLogic.Mappers
             };
         }
 
-        public static CartItem ToEntity(CartItemCreateDTO dto)
+        public static CartItem ToEntity(CartItemCreateDTO dto, int userId)
         {
             return new CartItem
             {
                 ProductId = dto.ProductId,
-                Quantity = dto.Quantity
+                Quantity = dto.Quantity,
+                UserId = userId
             };
         }
     }

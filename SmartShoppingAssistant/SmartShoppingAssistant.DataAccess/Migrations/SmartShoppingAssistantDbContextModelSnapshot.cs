@@ -16,7 +16,7 @@ namespace SmartShoppingAssistant.DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.6")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -35,10 +35,14 @@ namespace SmartShoppingAssistant.DataAccess.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .IsUnique();
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CartItems", (string)null);
                 });
@@ -494,15 +498,53 @@ namespace SmartShoppingAssistant.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SmartShoppingAssistant.DataAccess.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+                });
+
             modelBuilder.Entity("SmartShoppingAssistant.DataAccess.Entities.CartItem", b =>
                 {
                     b.HasOne("SmartShoppingAssistant.DataAccess.Entities.Product", "Product")
-                        .WithOne("cartItem")
-                        .HasForeignKey("SmartShoppingAssistant.DataAccess.Entities.CartItem", "ProductId")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartShoppingAssistant.DataAccess.Entities.User", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SmartShoppingAssistant.DataAccess.Entities.ProductCategory", b =>
@@ -548,9 +590,14 @@ namespace SmartShoppingAssistant.DataAccess.Migrations
 
             modelBuilder.Entity("SmartShoppingAssistant.DataAccess.Entities.Product", b =>
                 {
-                    b.Navigation("Promotions");
+                    b.Navigation("CartItems");
 
-                    b.Navigation("cartItem");
+                    b.Navigation("Promotions");
+                });
+
+            modelBuilder.Entity("SmartShoppingAssistant.DataAccess.Entities.User", b =>
+                {
+                    b.Navigation("CartItems");
                 });
 #pragma warning restore 612, 618
         }

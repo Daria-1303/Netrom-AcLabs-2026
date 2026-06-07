@@ -23,9 +23,9 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
         ISuggestionComposerAgent suggestionComposerAgent,
         ICategoryService categoryService) :     ICartService
     {
-        public async Task<CartGetDTO> GetCartAsync()
+        public async Task<CartGetDTO> GetCartAsync(int userId)
         {
-            var cartItems = await cartItemRepository.GetAllWithProductsAsync();
+            var cartItems = await cartItemRepository.GetAllWithProductsAsync(userId);
             var itemDtos = cartItems.Select(CartItemMapper.ToCartItemGetDTO).ToList();
 
             var subtotal = itemDtos.Sum(i => i.ItemTypeTotal);
@@ -40,10 +40,9 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
             };
         }
 
-        public async Task<CartItemGetDTO> AddItemAsync(CartItemCreateDTO dto)
+        public async Task<CartItemGetDTO> AddItemAsync(CartItemCreateDTO dto, int userId)
         {
-            // verificam daca mai e produsul in cos
-            var allItems = await cartItemRepository.GetAllWithProductsAsync();
+            var allItems = await cartItemRepository.GetAllWithProductsAsync(userId);
             var existing = allItems.FirstOrDefault(ci => ci.ProductId == dto.ProductId);
 
             if (existing != null)
@@ -53,28 +52,29 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
                 return CartItemMapper.ToCartItemGetDTO(existing);
             }
 
-            var newItem = CartItemMapper.ToEntity(dto);
+            var newItem = CartItemMapper.ToEntity(dto, userId);
             var created = await cartItemRepository.AddAsync(newItem);
-            var withProduct = await cartItemRepository.GetByIdWithProductAsync(created.Id);
+            var withProduct = await cartItemRepository.GetByIdWithProductAsync(created.Id, userId);
             return CartItemMapper.ToCartItemGetDTO(withProduct);
         }
 
-        public async Task<CartItemGetDTO> UpdateItemQuantityAsync(int itemId, CartItemUpdateDTO dto)
+        public async Task<CartItemGetDTO> UpdateItemQuantityAsync(int itemId, CartItemUpdateDTO dto, int userId)
         {
-            var item = await cartItemRepository.GetByIdWithProductAsync(itemId);
+            var item = await cartItemRepository.GetByIdWithProductAsync(itemId, userId);
             item.Quantity = dto.Quantity;
             await cartItemRepository.UpdateAsync(item);
             return CartItemMapper.ToCartItemGetDTO(item);
         }
 
-        public async Task RemoveItemAsync(int itemId)
+        public async Task RemoveItemAsync(int itemId, int userId)
         {
-            await cartItemRepository.DeleteAsync(itemId);
+            var item = await cartItemRepository.GetByIdWithProductAsync(itemId, userId);
+            await cartItemRepository.DeleteAsync(item.Id);
         }
 
-        public async Task ClearCartAsync()
+        public async Task ClearCartAsync(int userId)
         {
-            await cartItemRepository.DeleteAllAsync();
+            await cartItemRepository.DeleteAllAsync(userId);
         }
 
         private async Task<decimal> CalculateDiscountAsync(List<CartItem> cartItems, decimal subtotal)
@@ -135,9 +135,9 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
             };
         }
 
-        public async Task<AnalysisResponse> AnalyzeCartAsync()
+        public async Task<AnalysisResponse> AnalyzeCartAsync(int userId)
         {
-            var cart = await cartItemRepository.GetAllWithProductWithCategoriesAsync();
+            var cart = await cartItemRepository.GetAllWithProductWithCategoriesAsync(userId);
             var categoriesResult = await categoryService.GetAllAsync(new QueryParams { PageSize = 1000 });
 
             var cartJson = JsonSerializer.Serialize(cart.Select(c => new

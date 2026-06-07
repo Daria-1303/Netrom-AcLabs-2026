@@ -1,18 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartShoppingAssistant.DataAccess.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SmartShoppingAssistant.DataAccess.Repositories
 {
-    public class CartItemRepository(SmartShoppingAssistantDbContext context): BaseRepository<CartItem>(context), ICartItemRepository
+    public class CartItemRepository(SmartShoppingAssistantDbContext context) : BaseRepository<CartItem>(context), ICartItemRepository
     {
-        public async Task<CartItem> GetByIdWithProductAsync(int id)
+        public async Task<CartItem> GetByIdWithProductAsync(int id, int userId)
         {
             var item = await context.CartItems
                 .Include(ci => ci.Product)
-                .FirstOrDefaultAsync(ci => ci.Id == id);
+                .FirstOrDefaultAsync(ci => ci.Id == id && ci.UserId == userId);
 
             if (item == null)
                 throw new KeyNotFoundException($"CartItem with ID {id} was not found.");
@@ -20,34 +17,31 @@ namespace SmartShoppingAssistant.DataAccess.Repositories
             return item;
         }
 
-        public async Task<List<CartItem>> GetAllWithProductsAsync()
+        public async Task<List<CartItem>> GetAllWithProductsAsync(int userId)
         {
             return await context.CartItems
+                .Where(ci => ci.UserId == userId)
                 .Include(ci => ci.Product)
                     .ThenInclude(p => p.Categories)
                 .ToListAsync();
         }
 
-        public async Task DeleteAllAsync()
+        public async Task DeleteAllAsync(int userId)
         {
-            var allItems = await context.CartItems.ToListAsync();
-            context.CartItems.RemoveRange(allItems);
+            var items = await context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .ToListAsync();
+            context.CartItems.RemoveRange(items);
             await context.SaveChangesAsync();
         }
 
-
-        // adaugat
-        private IQueryable<CartItem> WithProductWithCategories()
+        public async Task<List<CartItem>> GetAllWithProductWithCategoriesAsync(int userId)
         {
-            return context.CartItems
+            return await context.CartItems
+                .Where(ci => ci.UserId == userId)
                 .Include(ci => ci.Product)
-                    .ThenInclude(p => p.Categories);
-        }
-
-
-        public async Task<List<CartItem>> GetAllWithProductWithCategoriesAsync()
-        {
-            return await WithProductWithCategories().ToListAsync();
+                    .ThenInclude(p => p.Categories)
+                .ToListAsync();
         }
     }
 }

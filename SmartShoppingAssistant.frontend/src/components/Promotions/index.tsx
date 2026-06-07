@@ -4,6 +4,7 @@ import {
     TablePagination, TableRow, TableSortLabel, TextField, Tooltip,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 import type { Promotion } from '../shared/types/Promotion'
 import { PromotionReward, PromotionType } from '../shared/types/Promotion'
 import type { Category } from '../shared/types/Category'
@@ -31,6 +32,7 @@ const promotionRewardLabel: Record<PromotionReward, string> = {
 }
 
 function Promotions() {
+    const { isAdmin } = useAuth()
     const { items, totalCount, page, pageSize, search, sortBy, sortDir, loading, error, setPage, setPageSize, setSearch, toggleSort, reload } = useTableState({
         fetchFn: PromotionsApi.getAll,
         initialSortBy: 'name',
@@ -77,7 +79,7 @@ function Promotions() {
 
     return (
         <Container maxWidth='xl' sx={{ py: 4 }}>
-            <PageHeader title='Promotions' actionLabel='Add Promotion' onAction={handleAdd} />
+            <PageHeader title='Promotions' actionLabel={isAdmin() ? 'Add Promotion' : undefined} onAction={isAdmin() ? handleAdd : undefined} />
 
             <TextField
                 value={search}
@@ -130,7 +132,7 @@ function Promotions() {
                                     </TableSortLabel>
                                 </TableCell>
                                 <TableCell>Status</TableCell>
-                                <TableCell align='right'>Actions</TableCell>
+                                {isAdmin() && <TableCell align='right'>Actions</TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -152,23 +154,25 @@ function Promotions() {
                                             size='small'
                                         />
                                     </TableCell>
-                                    <TableCell align='right'>
-                                        <Tooltip title='Edit'>
-                                            <IconButton color='primary' onClick={() => handleEdit(promotion)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title='Delete'>
-                                            <IconButton color='error' onClick={() => handleDeleteClick(promotion)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                                    {isAdmin() && (
+                                        <TableCell align='right'>
+                                            <Tooltip title='Edit'>
+                                                <IconButton color='primary' onClick={() => handleEdit(promotion)}>
+                                                    <EditIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Delete'>
+                                                <IconButton color='error' onClick={() => handleDeleteClick(promotion)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                             {items.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={7} sx={{ border: 0 }}>
+                                    <TableCell colSpan={isAdmin() ? 7 : 6} sx={{ border: 0 }}>
                                         <EmptyState message='No promotions yet.' />
                                     </TableCell>
                                 </TableRow>
@@ -187,7 +191,7 @@ function Promotions() {
                 </TableContainer>
             )}
 
-            {formOpen && (
+            {isAdmin() && formOpen && (
                 <PromotionFormDialog
                     promotion={editing}
                     categories={categories}

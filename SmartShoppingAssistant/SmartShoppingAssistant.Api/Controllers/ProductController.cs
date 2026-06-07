@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Common;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Product;
 using SmartShoppingAssistant.BusinessLogic.Services.Interfaces;
 
 namespace SmartShoppingAssistant.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/products")]
     [ApiController]
     public class ProductsController(IProductService productService) : ControllerBase
     {
-        // GET /api/products/3
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductGetDTO>> GetById(int id)
         {
@@ -24,7 +25,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-        // GET /api/products
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<PagedResult<ProductGetDTO>>> GetAll([FromQuery] QueryParams queryParams)
         {
@@ -33,8 +34,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             return Ok(result);
         }
 
-
-        // POST /api/products
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ProductGetDTO>> Create([FromBody] ProductCreateDTO dto)
         {
@@ -42,7 +42,6 @@ namespace SmartShoppingAssistant.Api.Controllers
             {
                 var createdProduct = await productService.CreateAsync(dto);
                 return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id }, createdProduct);
-
             }
             catch (Exception ex)
             {
@@ -50,9 +49,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-
-        // PUT /api/products/3
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ProductGetDTO>> Update(int id, [FromBody] ProductUpdateDTO dto)
         {
@@ -67,8 +64,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-
-        // DELETE /api/products/3
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

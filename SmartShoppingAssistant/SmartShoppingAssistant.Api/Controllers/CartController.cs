@@ -1,17 +1,22 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartShoppingAssistant.BusinessLogic.DTOs.CartItem;
 using SmartShoppingAssistant.BusinessLogic.Services.Interfaces;
+using System.Security.Claims;
 
 namespace SmartShoppingAssistant.Api.Controllers
 {
     [ApiController]
     [Route("api/cart")]
+    [Authorize]
     public class CartController(ICartService cartService) : ControllerBase
     {
+        private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
         [HttpGet]
         public async Task<IActionResult> GetCart()
         {
-            var cart = await cartService.GetCartAsync();
+            var cart = await cartService.GetCartAsync(UserId);
             return Ok(cart);
         }
 
@@ -20,7 +25,7 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var item = await cartService.AddItemAsync(dto);
+                var item = await cartService.AddItemAsync(dto, UserId);
                 return CreatedAtAction(nameof(GetCart), item);
             }
             catch (Exception ex)
@@ -34,10 +39,10 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var item = await cartService.UpdateItemQuantityAsync(itemId, dto);
+                var item = await cartService.UpdateItemQuantityAsync(itemId, dto, UserId);
                 return Ok(item);
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -48,10 +53,10 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                await cartService.RemoveItemAsync(itemId);
+                await cartService.RemoveItemAsync(itemId, UserId);
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
@@ -60,7 +65,7 @@ namespace SmartShoppingAssistant.Api.Controllers
         [HttpDelete]
         public async Task<IActionResult> ClearCart()
         {
-            await cartService.ClearCartAsync();
+            await cartService.ClearCartAsync(UserId);
             return NoContent();
         }
 
@@ -69,7 +74,7 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var result = await cartService.AnalyzeCartAsync();
+                var result = await cartService.AnalyzeCartAsync(UserId);
                 return Ok(result);
             }
             catch (Exception ex)

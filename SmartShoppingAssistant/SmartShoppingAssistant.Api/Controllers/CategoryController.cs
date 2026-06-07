@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Categories;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Common;
 using SmartShoppingAssistant.BusinessLogic.Services.Interfaces;
@@ -9,7 +10,7 @@ namespace SmartShoppingAssistant.Api.Controllers
     [ApiController]
     public class CategoryController(ICategoryService categoryService) : ControllerBase
     {
-        // GET /api/categories/3
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryGetDTO>> GetById(int id)
         {
@@ -24,7 +25,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-        // GET /api/categories
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<PagedResult<CategoryGetDTO>>> GetAll([FromQuery] QueryParams queryParams)
         {
@@ -33,7 +34,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             return Ok(result);
         }
 
-        // POST /api/category
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<CategoryGetDTO>> Create([FromBody] CategoryCreateDTO dto)
         {
@@ -48,7 +49,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-        // PUT /api/categories/3
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<CategoryGetDTO>> Update(int id, [FromBody] CategoryUpdateDTO dto)
         {
@@ -63,7 +64,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
-        // DELETE /api/category/3
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
@@ -76,7 +77,6 @@ namespace SmartShoppingAssistant.Api.Controllers
             {
                 return NotFound(ex.Message);
             }
-
         }
     }
 }

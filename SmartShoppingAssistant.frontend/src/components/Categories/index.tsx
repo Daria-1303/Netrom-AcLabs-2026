@@ -7,6 +7,7 @@ import { useState } from 'react'
 import type { Category } from '../shared/types/Category'
 import { CategoriesApi } from '../../api/clients/CategoryApiClient'
 import { useTableState } from '../../hooks/useTableState'
+import { useAuth } from '../../context/AuthContext'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import SearchIcon from '@mui/icons-material/Search'
@@ -16,6 +17,7 @@ import ConfirmDialog from '../common/ConfirmDialog'
 import EmptyState from '../common/EmptyState'
 
 function Categories() {
+    const { isAdmin } = useAuth()
     const { items, totalCount, page, pageSize, search, sortBy, sortDir, loading, error, setPage, setPageSize, setSearch, toggleSort, reload } = useTableState({
         fetchFn: CategoriesApi.getAll,
         initialSortBy: 'name',
@@ -54,7 +56,11 @@ function Categories() {
 
     return (
         <Container maxWidth='xl' sx={{ py: 4 }}>
-            <PageHeader title='Categories' actionLabel='Add Category' onAction={handleAdd} />
+            <PageHeader
+                title='Categories'
+                actionLabel={isAdmin() ? 'Add Category' : undefined}
+                onAction={isAdmin() ? handleAdd : undefined}
+            />
 
             <TextField
                 value={search}
@@ -94,7 +100,7 @@ function Categories() {
                                         Description
                                     </TableSortLabel>
                                 </TableCell>
-                                <TableCell align='right'>Actions</TableCell>
+                                {isAdmin() && <TableCell align='right'>Actions</TableCell>}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -102,23 +108,25 @@ function Categories() {
                                 <TableRow key={category.id} hover>
                                     <TableCell>{category.name}</TableCell>
                                     <TableCell>{category.description}</TableCell>
-                                    <TableCell align='right'>
-                                        <Tooltip title='Edit'>
-                                            <IconButton color='primary' onClick={() => handleEdit(category)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title='Delete'>
-                                            <IconButton color='error' onClick={() => handleDeleteClick(category)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </TableCell>
+                                    {isAdmin() && (
+                                        <TableCell align='right'>
+                                            <Tooltip title='Edit'>
+                                                <IconButton color='primary' onClick={() => handleEdit(category)}>
+                                                    <EditIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title='Delete'>
+                                                <IconButton color='error' onClick={() => handleDeleteClick(category)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                             {items.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={3} sx={{ border: 0 }}>
+                                    <TableCell colSpan={isAdmin() ? 3 : 2} sx={{ border: 0 }}>
                                         <EmptyState message='No categories yet.' />
                                     </TableCell>
                                 </TableRow>
@@ -137,7 +145,7 @@ function Categories() {
                 </TableContainer>
             )}
 
-            {formOpen && (
+            {isAdmin() && formOpen && (
                 <CategoryFormDialog
                     category={editing}
                     onClose={() => setFormOpen(false)}

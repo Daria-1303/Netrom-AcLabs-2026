@@ -6,6 +6,8 @@ namespace SmartShoppingAssistant.DataAccess
 {
     public class SmartShoppingAssistantDbContext(DbContextOptions<SmartShoppingAssistantDbContext> options) : DbContext(options)
     {
+        public DbSet<User> Users { get; set; } = null!;
+
         public DbSet<Product> Products { get; set; } = null!;
 
         public DbSet<Category> Categories { get; set; } = null!;

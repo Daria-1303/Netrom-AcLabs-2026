@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Common;
 using SmartShoppingAssistant.BusinessLogic.DTOs.Promotions;
 using SmartShoppingAssistant.BusinessLogic.Services.Interfaces;
@@ -9,6 +10,7 @@ namespace SmartShoppingAssistant.Api.Controllers
     [Route("api/promotions")]
     public class PromotionController(IPromotionService promotionService) : ControllerBase
     {
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -23,6 +25,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<PagedResult<PromotionGetDTO>>> GetAll([FromQuery] QueryParams queryParams)
         {
@@ -31,6 +34,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] PromotionCreateDTO dto)
         {
@@ -45,6 +49,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PromotionUpdateDTO dto)
         {
@@ -59,6 +64,7 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
