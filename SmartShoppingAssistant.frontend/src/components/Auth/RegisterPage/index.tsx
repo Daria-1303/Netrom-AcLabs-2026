@@ -28,7 +28,7 @@ function RegisterPage() {
     return (
         <Container maxWidth='xs' sx={{ py: 8 }}>
             <Paper sx={{ p: 4 }}>
-                <Typography variant='h5' fontWeight={300} mb={3}>Create account</Typography>
+                <Typography variant='h5' sx={{ fontWeight: 300, mb: 3 }}>Create account</Typography>
                 {error && <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>}
                 <Box component='form' onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
@@ -50,7 +50,7 @@ function RegisterPage() {
                     <Button type='submit' variant='contained' fullWidth disabled={loading}>
                         {loading ? 'Creating account...' : 'Register'}
                     </Button>
-                    <Typography variant='body2' textAlign='center' color='text.secondary'>
+                    <Typography variant='body2' sx={{ textAlign: 'center' }} color='text.secondary'>
                         Already have an account?{' '}
                         <Link to='/login' style={{ color: 'inherit' }}>Sign in</Link>
                     </Typography>

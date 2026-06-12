@@ -1,6 +1,6 @@
 import { useState } from "react"
 import {
-    Alert, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
+    Alert, Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
     FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select,
     Stack, TextField,
 } from "@mui/material"
@@ -87,7 +87,7 @@ function ProductFormDialog({ product, categories, onClose, onSaved }: ProductFor
                         onChange={(e) => setPrice(e.target.value)}
                         fullWidth
                         type="number"
-                        inputProps={{ min: 0, step: 0.01 }}
+                        slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
                     />
                     <TextField
                         label="Image URL"
@@ -95,6 +95,14 @@ function ProductFormDialog({ product, categories, onClose, onSaved }: ProductFor
                         onChange={(e) => setImageUrl(e.target.value)}
                         fullWidth
                     />
+                    {imageUrl !== '' && (
+                        <Box
+                            component="img"
+                            src={imageUrl}
+                            alt="Preview"
+                            sx={{ width: 80, height: 80, objectFit: 'cover' }}
+                        />
+                    )}
                     <FormControl fullWidth>
                         <InputLabel>Categories</InputLabel>
                         <Select

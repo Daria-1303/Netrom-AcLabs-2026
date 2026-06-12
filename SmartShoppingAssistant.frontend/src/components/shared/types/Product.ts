@@ -7,16 +7,21 @@ export interface Product {
     description: string
     imageUrl: string
     price: number
+    priceLabel: string
     categories: Category[]
+    categoriesLabel: string
 }
 
 export function toProduct(dto: ProductModel): Product {
+    const categories = dto.categories.map(toCategory)
     return {
         id: dto.id,
         name: dto.name,
         description: dto.description ?? "",
         imageUrl: dto.imageUrl ?? "",
         price: dto.price,
-        categories: dto.categories.map(toCategory),
+        priceLabel: `${dto.price.toFixed(2)} RON`,
+        categories,
+        categoriesLabel: categories.map((c) => c.name).join(', '),
     }
 }

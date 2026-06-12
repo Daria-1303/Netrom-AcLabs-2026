@@ -21,7 +21,9 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem(STORAGE_KEY)
-            window.location.href = '/login'
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login'
+            }
         }
         const data = error.response?.data
         const message = typeof data === 'string' && data !== '' ? data : error.message || 'Request failed'

@@ -31,7 +31,7 @@ function LoginPage() {
     return (
         <Container maxWidth='xs' sx={{ py: 8 }}>
             <Paper sx={{ p: 4 }}>
-                <Typography variant='h5' fontWeight={300} mb={3}>Sign in</Typography>
+                <Typography variant='h5' sx={{ fontWeight: 300, mb: 3 }}>Sign in</Typography>
                 {error && <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>}
                 <Box component='form' onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
@@ -53,7 +53,7 @@ function LoginPage() {
                     <Button type='submit' variant='contained' fullWidth disabled={loading}>
                         {loading ? 'Signing in...' : 'Sign in'}
                     </Button>
-                    <Typography variant='body2' textAlign='center' color='text.secondary'>
+                    <Typography variant='body2' sx={{ textAlign: 'center' }} color='text.secondary'>
                         No account?{' '}
                         <Link to='/register' style={{ color: 'inherit' }}>Register</Link>
                     </Typography>

@@ -45,15 +45,15 @@ const theme = createTheme({
           boxShadow: 'none',
           '&:hover': { boxShadow: 'none' },
           '&:active': { boxShadow: 'none' },
+          '&.MuiButton-containedPrimary': {
+            backgroundColor: '#C8C000',
+            color: '#2C2C1F',
+            '&:hover': { backgroundColor: '#b8b000' },
+            '&:active': { backgroundColor: '#3F3F2E', color: '#F9F8F2' },
+          },
         },
         sizeSmall: {
           padding: '6px 16px',
-        },
-        containedPrimary: {
-          backgroundColor: '#C8C000',
-          color: '#2C2C1F',
-          '&:hover': { backgroundColor: '#b8b000' },
-          '&:active': { backgroundColor: '#3F3F2E', color: '#F9F8F2' },
         },
       },
     },

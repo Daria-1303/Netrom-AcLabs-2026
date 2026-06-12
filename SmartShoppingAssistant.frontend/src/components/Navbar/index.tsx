@@ -1,13 +1,20 @@
-import { AppBar, Box, Button, Toolbar } from '@mui/material'
+import { AppBar, Badge, Box, Button, IconButton, Toolbar } from '@mui/material'
 import { NavLink, Link } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import { useAuth } from '../../context/AuthContext'
+import { useCart } from '../../context/CartContext/cart-context'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 
-const navLinks = [
+const userNavLinks = [
     { label: 'Home', to: '/' },
+    { label: 'Shop', to: '/shop' },
+]
+
+const adminNavLinks = [
     { label: 'Categories', to: '/categories' },
     { label: 'Products', to: '/products' },
     { label: 'Promotions', to: '/promotions' },
+    { label: 'Users', to: '/users' },
 ]
 
 const linkSx = {
@@ -25,6 +32,7 @@ const linkSx = {
 
 function Navbar() {
     const { user, logout, isAdmin } = useAuth()
+    const { cart, openCart } = useCart()
 
     return (
         <AppBar position='static'>
@@ -37,20 +45,27 @@ function Navbar() {
                         sx={{ height: 48, display: 'block' }}
                     />
                 </Link>
-                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    {navLinks.map(({ label, to }) => (
-                        <Box key={to} component={NavLink} to={to} end={to === '/'} sx={linkSx}>
-                            {label}
-                        </Box>
-                    ))}
-                    {isAdmin() && (
-                        <Box component={NavLink} to='/users' sx={linkSx}>
-                            Users
-                        </Box>
-                    )}
-                </Box>
-                <Box sx={{ ml: 'auto' }}>
-                    {user ? (
+                {user && (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        {userNavLinks.map(({ label, to }) => (
+                            <Box key={to} component={NavLink} to={to} end={to === '/'} sx={linkSx}>
+                                {label}
+                            </Box>
+                        ))}
+                        {isAdmin() && adminNavLinks.map(({ label, to }) => (
+                            <Box key={to} component={NavLink} to={to} sx={linkSx}>
+                                {label}
+                            </Box>
+                        ))}
+                    </Box>
+                )}
+                {user && (
+                    <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <IconButton color='inherit' onClick={openCart}>
+                            <Badge badgeContent={cart?.itemCount ?? 0} color='primary'>
+                                <ShoppingCartIcon />
+                            </Badge>
+                        </IconButton>
                         <Button
                             variant='outlined'
                             size='small'
@@ -59,8 +74,8 @@ function Navbar() {
                         >
                             Logout
                         </Button>
-                    ) : null}
-                </Box>
+                    </Box>
+                )}
             </Toolbar>
         </AppBar>
     )

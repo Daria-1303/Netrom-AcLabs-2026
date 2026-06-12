@@ -1,7 +1,7 @@
 import { useState } from "react"
 import {
-    Alert, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle,
-    FormControl, FormControlLabel, InputLabel, MenuItem, Select, Stack, TextField,
+    Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+    FormControl, FormControlLabel, InputLabel, MenuItem, Select, Stack, Switch, TextField,
 } from "@mui/material"
 import type { Promotion } from "../../shared/types/Promotion"
 import { PromotionReward, PromotionType } from "../../shared/types/Promotion"
@@ -104,7 +104,7 @@ function PromotionFormDialog({ promotion, categories, products, onClose, onSaved
                         onChange={(e) => setThreshold(e.target.value)}
                         fullWidth
                         type="number"
-                        inputProps={{ min: 0, step: type === PromotionType.Quantity ? 1 : 0.01 }}
+                        slotProps={{ htmlInput: { min: 0, step: type === PromotionType.Quantity ? 1 : 0.01 } }}
                     />
                     <FormControl fullWidth>
                         <InputLabel>Reward</InputLabel>
@@ -123,7 +123,7 @@ function PromotionFormDialog({ promotion, categories, products, onClose, onSaved
                         onChange={(e) => setRewardValue(e.target.value)}
                         fullWidth
                         type="number"
-                        inputProps={{ min: 0, step: 1 }}
+                        slotProps={{ htmlInput: { min: 0, step: 1 } }}
                     />
                     <FormControl fullWidth>
                         <InputLabel>Product (optional)</InputLabel>
@@ -161,7 +161,7 @@ function PromotionFormDialog({ promotion, categories, products, onClose, onSaved
                     </FormControl>
                     <FormControlLabel
                         control={
-                            <Checkbox
+                            <Switch
                                 checked={isActive}
                                 onChange={(e) => setIsActive(e.target.checked)}
                             />

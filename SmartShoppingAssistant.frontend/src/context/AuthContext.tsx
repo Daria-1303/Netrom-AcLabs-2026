@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     function logout() {
+        localStorage.removeItem(STORAGE_KEY)
         setUser(null)
         window.location.href = '/login'
     }
