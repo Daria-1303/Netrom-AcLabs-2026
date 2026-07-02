@@ -7,6 +7,7 @@ import {
     CardContent,
     CardMedia,
     Checkbox,
+    Chip,
     CircularProgress,
     Container,
     Divider,
@@ -21,18 +22,24 @@ import {
     Typography,
 } from "@mui/material"
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ProductsApi } from "../../api/clients/ProductApiClient"
 import { CategoriesApi } from "../../api/clients/CategoryApiClient"
-import type { Product } from "../shared/types/Product"
+import { PromotionsApi } from "../../api/clients/PromotionApiClient"
+import { PRODUCT_IMAGE_FALLBACK, type Product } from "../shared/types/Product"
 import type { Category } from "../shared/types/Category"
+import { promotionTargetsProduct, type Promotion } from "../shared/types/Promotion"
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
+import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import { useCart } from "../../context/CartContext/cart-context"
 
 type SortOption = 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc'
 
 function Shop() {
+    const navigate = useNavigate()
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
+    const [promotions, setPromotions] = useState<Promotion[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [search, setSearch] = useState("")
@@ -59,7 +66,15 @@ function Shop() {
             .finally(() => setLoading(false))
 
         CategoriesApi.getAll({ pageSize: 100 }).then((r) => setCategories(r.items))
+        PromotionsApi.getAll({ pageSize: 50 })
+            .then((r) => setPromotions(r.items.filter((p) => p.isActive)))
+            .catch(() => {})
     }, [])
+
+    function hasPromo(product: Product): boolean {
+        const categoryIds = product.categories.map((c) => c.id)
+        return promotions.some((p) => promotionTargetsProduct(p, product.id, categoryIds))
+    }
 
     function toggleCategory(id: number) {
         setSelectedCategories((prev) => {
@@ -183,14 +198,35 @@ function Shop() {
                         >
                             {visibleProducts.map((product) => (
                                 <Card key={product.id} sx={{ display: 'flex', flexDirection: 'column' }}>
-                                    <CardMedia
-                                        component="img"
-                                        height="160"
-                                        image={product.imageUrl}
-                                        alt={product.name}
-                                        sx={{ objectFit: 'cover' }}
-                                    />
-                                    <CardContent sx={{ flexGrow: 1 }}>
+                                    <Box
+                                        onClick={() => navigate(`/product/${product.id}`)}
+                                        sx={{ position: 'relative', cursor: 'pointer' }}
+                                    >
+                                        <CardMedia
+                                            component="img"
+                                            height="160"
+                                            image={product.imageUrl}
+                                            alt={product.name}
+                                            sx={{ objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                e.currentTarget.onerror = null
+                                                e.currentTarget.src = PRODUCT_IMAGE_FALLBACK
+                                            }}
+                                        />
+                                        {hasPromo(product) && (
+                                            <Chip
+                                                icon={<LocalOfferIcon />}
+                                                label="Promo"
+                                                color="primary"
+                                                size="small"
+                                                sx={{ position: 'absolute', top: 8, left: 8 }}
+                                            />
+                                        )}
+                                    </Box>
+                                    <CardContent
+                                        sx={{ flexGrow: 1, cursor: 'pointer' }}
+                                        onClick={() => navigate(`/product/${product.id}`)}
+                                    >
                                         <Typography variant="h6">{product.name}</Typography>
                                         <Typography variant="body2" color="textSecondary">
                                             {product.description}

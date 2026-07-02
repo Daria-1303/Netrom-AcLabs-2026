@@ -1,9 +1,12 @@
-import { AppBar, Badge, Box, Button, IconButton, Toolbar } from '@mui/material'
+import { AppBar, Badge, Box, Button, IconButton, Toolbar, Tooltip } from '@mui/material'
 import { NavLink, Link } from 'react-router-dom'
 import logo from '../../assets/logo.png'
 import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext/cart-context'
+import { useColorMode } from '../../context/ColorModeContext'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 
 const userNavLinks = [
     { label: 'Home', to: '/' },
@@ -33,6 +36,7 @@ const linkSx = {
 function Navbar() {
     const { user, logout, isAdmin } = useAuth()
     const { cart, openCart } = useCart()
+    const { mode, toggleColorMode } = useColorMode()
 
     return (
         <AppBar position='static'>
@@ -47,25 +51,27 @@ function Navbar() {
                 </Link>
                 {user && (
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        {userNavLinks.map(({ label, to }) => (
+                        {(isAdmin() ? adminNavLinks : userNavLinks).map(({ label, to }) => (
                             <Box key={to} component={NavLink} to={to} end={to === '/'} sx={linkSx}>
-                                {label}
-                            </Box>
-                        ))}
-                        {isAdmin() && adminNavLinks.map(({ label, to }) => (
-                            <Box key={to} component={NavLink} to={to} sx={linkSx}>
                                 {label}
                             </Box>
                         ))}
                     </Box>
                 )}
-                {user && (
-                    <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Tooltip title={mode === 'dark' ? 'Switch to light' : 'Switch to dark'}>
+                        <IconButton color='inherit' onClick={toggleColorMode}>
+                            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+                        </IconButton>
+                    </Tooltip>
+                    {user && !isAdmin() && (
                         <IconButton color='inherit' onClick={openCart}>
                             <Badge badgeContent={cart?.itemCount ?? 0} color='primary'>
                                 <ShoppingCartIcon />
                             </Badge>
                         </IconButton>
+                    )}
+                    {user && (
                         <Button
                             variant='outlined'
                             size='small'
@@ -74,8 +80,8 @@ function Navbar() {
                         >
                             Logout
                         </Button>
-                    </Box>
-                )}
+                    )}
+                </Box>
             </Toolbar>
         </AppBar>
     )

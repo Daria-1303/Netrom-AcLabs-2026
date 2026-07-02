@@ -5,6 +5,7 @@ import CartProvider from './context/CartContext/CartProvider'
 import Navbar from './components/Navbar'
 import Home from './components/Home'
 import Shop from './components/Shop'
+import ProductDetail from './components/ProductDetail'
 import Categories from './components/Categories'
 import Products from './components/Products'
 import Promotions from './components/Promotions'
@@ -26,9 +27,10 @@ function App() {
                         <Route path='/login' element={<LoginPage />} />
                         <Route path='/register' element={<RegisterPage />} />
 
-                        <Route element={<ProtectedRoute />}>
+                        <Route element={<ProtectedRoute requiredRole='User' />}>
                             <Route path='/' element={<Home />} />
                             <Route path='/shop' element={<Shop />} />
+                            <Route path='/product/:id' element={<ProductDetail />} />
                         </Route>
 
                         <Route element={<ProtectedRoute requiredRole='Admin' />}>

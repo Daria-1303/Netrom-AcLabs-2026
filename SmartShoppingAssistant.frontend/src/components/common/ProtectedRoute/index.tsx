@@ -9,7 +9,10 @@ function ProtectedRoute({ requiredRole }: Props) {
     const { user } = useAuth()
 
     if (!user) return <Navigate to='/login' replace />
-    if (requiredRole && user.role !== requiredRole) return <Navigate to='/' replace />
+    if (requiredRole && user.role !== requiredRole) {
+        const home = user.role === 'Admin' ? '/categories' : '/'
+        return <Navigate to={home} replace />
+    }
 
     return <Outlet />
 }

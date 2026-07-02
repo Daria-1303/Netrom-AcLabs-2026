@@ -7,25 +7,25 @@ namespace SmartShoppingAssistant.DataAccess.Seed
     {
         public static void Seed(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ProductCategory>().HasData(
-                new ProductCategory { ProductId = 1, CategoryId = 1 },
-                new ProductCategory { ProductId = 2, CategoryId = 1 },
-                new ProductCategory { ProductId = 3, CategoryId = 2 },
-                new ProductCategory { ProductId = 4, CategoryId = 3 },
-                new ProductCategory { ProductId = 5, CategoryId = 1 },
-                new ProductCategory { ProductId = 6, CategoryId = 1 },
-                new ProductCategory { ProductId = 7, CategoryId = 1 },
-                new ProductCategory { ProductId = 8, CategoryId = 2 },
-                new ProductCategory { ProductId = 9, CategoryId = 2 },
-                new ProductCategory { ProductId = 10, CategoryId = 2 },
-                new ProductCategory { ProductId = 11, CategoryId = 3 },
-                new ProductCategory { ProductId = 12, CategoryId = 3 },
-                new ProductCategory { ProductId = 13, CategoryId = 3 },
-                new ProductCategory { ProductId = 14, CategoryId = 4 },
-                new ProductCategory { ProductId = 15, CategoryId = 4 },
-                new ProductCategory { ProductId = 16, CategoryId = 5 },
-                new ProductCategory { ProductId = 17, CategoryId = 5 }
-            );
+            var links = new List<ProductCategory>();
+
+            // Tricouri Naționale (categoria 1): produsele 1–48
+            for (int id = 1; id <= 48; id++)
+                links.Add(new ProductCategory { ProductId = id, CategoryId = 1 });
+
+            // Mingi & Echipament (categoria 2): produsele 49–55
+            for (int id = 49; id <= 55; id++)
+                links.Add(new ProductCategory { ProductId = id, CategoryId = 2 });
+
+            // Accesorii Fani (categoria 3): produsele 56–67
+            for (int id = 56; id <= 67; id++)
+                links.Add(new ProductCategory { ProductId = id, CategoryId = 3 });
+
+            // Colecționabile (categoria 4): produsele 68–74
+            for (int id = 68; id <= 74; id++)
+                links.Add(new ProductCategory { ProductId = id, CategoryId = 4 });
+
+            modelBuilder.Entity<ProductCategory>().HasData(links);
         }
     }
 }

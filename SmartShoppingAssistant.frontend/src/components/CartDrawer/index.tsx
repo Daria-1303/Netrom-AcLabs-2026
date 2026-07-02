@@ -4,6 +4,7 @@ import {
     Divider,
     Drawer,
     IconButton,
+    LinearProgress,
     List,
     ListItem,
     Typography,
@@ -12,20 +13,47 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DeleteIcon from '@mui/icons-material/Delete'
 import CloseIcon from '@mui/icons-material/Close'
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined'
+import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import { useCart } from '../../context/CartContext/cart-context'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import AnalyzeDialog from './AnalyzeDialog'
+import { PromotionsApi } from '../../api/clients/PromotionApiClient'
+import { PromotionType, type Promotion } from '../shared/types/Promotion'
 
 function CartDrawer() {
     const { cart, open, closeCart, updateQuantity, removeProduct } = useCart()
+    const navigate = useNavigate()
 
     const isEmpty = cart === null || cart.items.length === 0
 
     const [analyzeOpen, setAnalyzeOpen] = useState(false)
+    const [promotions, setPromotions] = useState<Promotion[]>([])
+
+    useEffect(() => {
+        PromotionsApi.getAll({ pageSize: 50 })
+            .then((r) => setPromotions(r.items.filter((p) => p.isActive)))
+            .catch(() => {})
+    }, [])
+
+    // Closest cart-total promotion the user hasn't unlocked yet — drives the progress bar.
+    const nextPromotion = (() => {
+        if (cart === null) return null
+        const candidates = promotions
+            .filter((p) => p.type === PromotionType.CartTotal && cart.subtotal < p.threshold)
+            .sort((a, b) => a.threshold - b.threshold)
+        return candidates[0] ?? null
+    })()
 
     const handleAnalyzeClose = () => {
         setAnalyzeOpen(false)
+    }
+
+    const handleBrowse = () => {
+        closeCart()
+        navigate('/shop')
     }
 
     return (
@@ -54,7 +82,28 @@ function CartDrawer() {
                 </Box>
 
                 {isEmpty ? (
-                    <Typography color="text.secondary">Your cart is empty.</Typography>
+                    <Box
+                        sx={{
+                            flexGrow: 1,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 2,
+                            textAlign: 'center',
+                        }}
+                    >
+                        <ShoppingBagOutlinedIcon sx={{ fontSize: 64, color: '#D8D8C4' }} />
+                        <Box>
+                            <Typography variant="h6">Your cart is empty</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Discover products and unlock great promotions.
+                            </Typography>
+                        </Box>
+                        <Button variant="contained" onClick={handleBrowse}>
+                            Browse products
+                        </Button>
+                    </Box>
                 ) : (
                     <>
                         <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
@@ -137,6 +186,32 @@ function CartDrawer() {
                                 <Typography variant="h6">Total</Typography>
                                 <Typography variant="h6">{cart.totalLabel}</Typography>
                             </Box>
+
+                            {nextPromotion && cart && (
+                                <Box
+                                    sx={{
+                                        mt: 2,
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        bgcolor: 'rgba(200,192,0,0.08)',
+                                        border: '1px solid rgba(200,192,0,0.25)',
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+                                        <LocalOfferIcon fontSize="small" color="primary" />
+                                        <Typography variant="body2">
+                                            Add{' '}
+                                            <strong>{(nextPromotion.threshold - cart.subtotal).toFixed(2)} RON</strong>{' '}
+                                            more to unlock <strong>{nextPromotion.name}</strong>
+                                        </Typography>
+                                    </Box>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={Math.min(100, (cart.subtotal / nextPromotion.threshold) * 100)}
+                                        sx={{ height: 8, borderRadius: 9999 }}
+                                    />
+                                </Box>
+                            )}
 
                             <Button
                                 fullWidth

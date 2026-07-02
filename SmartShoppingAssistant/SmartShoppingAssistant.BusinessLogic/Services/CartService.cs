@@ -29,14 +29,16 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
             var itemDtos = cartItems.Select(CartItemMapper.ToCartItemGetDTO).ToList();
 
             var subtotal = itemDtos.Sum(i => i.ItemTypeTotal);
-            var discount = await CalculateDiscountAsync(cartItems, subtotal);
+            var appliedPromotions = await GetAppliedPromotionsAsync(cartItems, subtotal);
+            var discount = appliedPromotions.Sum(p => p.Discount);
 
             return new CartGetDTO
             {
                 Items = itemDtos,
                 Subtotal = subtotal,
                 Discount = discount,
-                Total = subtotal - discount
+                Total = subtotal - discount,
+                AppliedPromotions = appliedPromotions
             };
         }
 
@@ -77,15 +79,21 @@ namespace SmartShoppingAssistant.BusinessLogic.Services
             await cartItemRepository.DeleteAllAsync(userId);
         }
 
-        private async Task<decimal> CalculateDiscountAsync(List<CartItem> cartItems, decimal subtotal)
+        private async Task<List<AppliedPromotionDTO>> GetAppliedPromotionsAsync(List<CartItem> cartItems, decimal subtotal)
         {
             var promotions = await promotionRepository.GetAllAsync();
             if (!promotions.Any())
-                return 0m;
+                return new List<AppliedPromotionDTO>();
 
             return promotions
                 .Where(p => p.IsActive)
-                .Sum(p => CalculateSinglePromotion(p, cartItems, subtotal));
+                .Select(p => new AppliedPromotionDTO
+                {
+                    PromotionName = p.Name,
+                    Discount = CalculateSinglePromotion(p, cartItems, subtotal)
+                })
+                .Where(ap => ap.Discount > 0m)
+                .ToList();
         }
 
         private decimal CalculateSinglePromotion(Promotion promotion, List<CartItem> cartItems, decimal subtotal)

@@ -8,6 +8,9 @@ export const ProductsApi = {
         const data = await http.get<PagedResult<ProductModel>>('/products', params as Record<string, unknown>)
         return { ...data, items: data.items.map(toProduct) }
     },
+    getById: async (id: number): Promise<Product> => {
+        return toProduct(await http.get<ProductModel>(`/products/${id}`))
+    },
     create: async (data: ProductInput): Promise<Product> => {
         return toProduct(await http.post<ProductModel>('/products', data))
     },
